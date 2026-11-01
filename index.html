@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាល</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box}
+body{margin:0;font-family:'Kantumruy Pro',sans-serif;background:#f1f5f9;color:#172033}
+button,input,select{font:inherit}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#102b55,#1769aa)}
+.login-box{background:white;padding:30px;border-radius:18px;width:100%;max-width:390px;text-align:center}
+.login-box h2{color:#164b85}
+.login-box input{width:100%;padding:13px;margin:8px 0;border:1px solid #d8e0ea;border-radius:9px}
+button{border:0;border-radius:8px;padding:10px 15px;cursor:pointer;background:#1769aa;color:white}
+button:hover{opacity:.88}
+.login-box button{width:100%;margin-top:12px;padding:13px}
+.layout{display:none;min-height:100vh}
+.sidebar{width:245px;background:#102b55;color:white;position:fixed;inset:0 auto 0 0;padding:22px 14px;overflow:auto}
+.brand{font-size:19px;font-weight:700;padding:10px 12px 25px}
+.nav{display:block;width:100%;text-align:left;margin:5px 0;background:transparent;color:#dceaff;padding:12px}
+.nav.active,.nav:hover{background:#24558d;color:white}
+.main{margin-left:245px;padding:25px;min-height:100vh}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}
+.top h2{margin:0;font-size:23px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px}
+.card,.panel{background:white;padding:20px;border-radius:13px;box-shadow:0 3px 12px #14243a0b}
+.card small{color:#718096}
+.card h2{margin:8px 0 0;color:#1769aa;font-size:27px}
+.panel{margin-bottom:20px}
+.panel h3{margin-top:0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+input,select{padding:10px;border:1px solid #d8e0ea;border-radius:8px;max-width:100%}
+.toolbar input{flex:1;min-width:160px}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #e8edf3;font-size:14px}
+th{background:#f6f8fb}
+.table-wrap{overflow:auto}
+.primary{background:#1769aa}
+.danger{background:#dc3545}
+.success{background:#198754}
+.warning{background:#d68b12}
+.muted{background:#64748b}
+.tag{padding:4px 9px;border-radius:20px;background:#e7f5ec;color:#198754;font-size:12px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.form-grid input,.form-grid select{width:100%}
+.hidden{display:none!important}
+.mobile-menu{display:none}
+@media(max-width:800px){
+.sidebar{width:220px;z-index:5;transform:translateX(-100%);transition:.2s}
+.sidebar.open{transform:translateX(0)}
+.main{margin-left:0;padding:16px}
+.cards{grid-template-columns:repeat(2,1fr)}
+.mobile-menu{display:inline-block}
+}
+@media(max-width:480px){.cards{grid-template-columns:1fr 1fr}.card{padding:13px}.form-grid{grid-template-columns:1fr}.top h2{font-size:18px}}
+@media print{
+.sidebar,.top button,.toolbar,.no-print{display:none!important}
+.main{margin:0;padding:0}
+body{background:white}
+.panel,.card{box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="loginPage">
+  <div class="login-box">
+    <h2>ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាល</h2>
+    <p>សូមចូលប្រើប្រាស់ប្រព័ន្ធ</p>
+    <input id="username" placeholder="ឈ្មោះអ្នកប្រើប្រាស់" value="admin">
+    <input id="password" type="password" placeholder="ពាក្យសម្ងាត់" value="admin123">
+    <button onclick="login()">ចូលប្រព័ន្ធ</button>
+    <p id="loginError" style="color:red"></p>
+    <small>Demo: admin / admin123</small>
+  </div>
+</div>
+
+<div class="layout" id="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">🏛️ ប្រព័ន្ធរដ្ឋបាល</div>
+  <button class="nav active" onclick="showPage('dashboard',this)">📊 ផ្ទាំងគ្រប់គ្រង</button>
+  <button class="nav" onclick="showPage('citizens',this)">👥 ប្រជាពលរដ្ឋ</button>
+  <button class="nav" onclick="showPage('staff',this)">👨‍💼 មន្ត្រីរដ្ឋបាល</button>
+  <button class="nav" onclick="showPage('documents',this)">📁 ឯកសាររដ្ឋបាល</button>
+  <button class="nav" onclick="showPage('requests',this)">📝 សំណើសេវា</button>
+  <button class="nav" onclick="showPage('reports',this)">📈 របាយការណ៍</button>
+  <button class="nav" onclick="logout()">🚪 ចាកចេញ</button>
+</aside>
+
+<main class="main">
+<div class="top">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <h2 id="pageTitle">ផ្ទាំងគ្រប់គ្រង</h2>
+  </div>
+  <span>👤 Admin</span>
+</div>
+
+<section id="dashboard" class="page">
+  <div class="cards">
+    <div class="card"><small>ប្រជាពលរដ្ឋសរុប</small><h2 id="citizenCount">0</h2></div>
+    <div class="card"><small>មន្ត្រីសរុប</small><h2 id="staffCount">0</h2></div>
+    <div class="card"><small>ឯកសារសរុប</small><h2 id="documentCount">0</h2></div>
+    <div class="card"><small>សំណើសរុប</small><h2 id="requestCount">0</h2></div>
+  </div>
+  <div class="panel">
+    <h3>សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងរដ្ឋបាល</h3>
+    <p>ប្រព័ន្ធនេះជួយគ្រប់គ្រងព័ត៌មានប្រជាពលរដ្ឋ មន្ត្រី ឯកសារ និងសំណើសេវារដ្ឋបាល។</p>
+    <p>សូមជ្រើសរើសមុខងារនៅផ្នែកខាងឆ្វេង ដើម្បីចាប់ផ្ដើមប្រើប្រាស់។</p>
+  </div>
+</section>
+
+<section id="citizens" class="page hidden">
+ <div class="panel">
+  <h3>គ្រប់គ្រងប្រជាពលរដ្ឋ</h3>
+  <div class="toolbar">
+   <input id="citizenSearch" placeholder="ស្វែងរកឈ្មោះ..." oninput="renderCitizens()">
+   <button onclick="addCitizen()">+ បន្ថែមប្រជាពលរដ្ឋ</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>ឈ្មោះ</th><th>ភេទ</th><th>អាយុ</th><th>អាសយដ្ឋាន</th><th>សកម្មភាព</th></tr></thead><tbody id="citizenTable"></tbody></table></div>
+ </div>
+</section>
+
+<section id="staff" class="page hidden">
+ <div class="panel">
+  <h3>គ្រប់គ្រងមន្ត្រីរដ្ឋបាល</h3>
+  <div class="toolbar">
+   <input id="staffSearch" placeholder="ស្វែងរកឈ្មោះ..." oninput="renderStaff()">
+   <button onclick="addStaff()">+ បន្ថែមមន្ត្រី</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>ឈ្មោះ</th><th>ភេទ</th><th>តួនាទី</th><th>លេខទូរស័ព្ទ</th><th>សកម្មភាព</th></tr></thead><tbody id="staffTable"></tbody></table></div>
+ </div>
+</section>
+
+<section id="documents" class="page hidden">
+ <div class="panel">
+  <h3>គ្រប់គ្រងឯកសាររដ្ឋបាល</h3>
+  <div class="toolbar">
+   <input id="docSearch" placeholder="ស្វែងរកឯកសារ..." oninput="renderDocuments()">
+   <button onclick="addDocument()">+ បន្ថែមឯកសារ</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>ឈ្មោះឯកសារ</th><th>ប្រភេទ</th><th>កាលបរិច្ឆេទ</th><th>សកម្មភាព</th></tr></thead><tbody id="documentTable"></tbody></table></div>
+ </div>
+</section>
+
+<section id="requests" class="page hidden">
+ <div class="panel">
+  <h3>គ្រប់គ្រងសំណើសេវារដ្ឋបាល</h3>
+  <div class="toolbar"><button onclick="addRequest()">+ បង្កើតសំណើថ្មី</button></div>
+  <div class="table-wrap"><table><thead><tr><th>ឈ្មោះអ្នកស្នើ</th><th>ប្រភេទសេវា</th><th>កាលបរិច្ឆេទ</th><th>ស្ថានភាព</th><th>សកម្មភាព</th></tr></thead><tbody id="requestTable"></tbody></table></div>
+ </div>
+</section>
+
+<section id="reports" class="page hidden">
+ <div class="panel">
+  <h3>របាយការណ៍ប្រព័ន្ធ</h3>
+  <p id="reportText"></p>
+  <button onclick="window.print()">🖨️ បោះពុម្ពរបាយការណ៍</button>
+  <button class="success" onclick="exportData()">⬇️ ទាញយកទិន្នន័យ JSON</button>
+  <label class="muted" style="display:inline-block;padding:10px;border-radius:8px;cursor:pointer">⬆️ នាំចូលទិន្នន័យ JSON
+   <input type="file" accept=".json" onchange="importData(event)" hidden>
+  </label>
+ </div>
+</section>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const load = key => JSON.parse(localStorage.getItem(key)||'[]');
+const save = (key,data) => localStorage.setItem(key,JSON.stringify(data));
+let citizens=load('citizens'),staff=load('staff'),documents=load('documents'),requests=load('requests');
+
+function login(){
+ if($('username').value==='admin' && $('password').value==='admin123'){
+  $('loginPage').style.display='none';$('app').style.display='block';updateDashboard();
+ }else $('loginError').textContent='ឈ្មោះ ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ!';
+}
+function logout(){
+ $('app').style.display='none';$('loginPage').style.display='grid';$('password').value='';
+}
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+ $(id).classList.remove('hidden');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+ btn.classList.add('active');
+ const titles={dashboard:'ផ្ទាំងគ្រប់គ្រង',citizens:'ប្រជាពលរដ្ឋ',staff:'មន្ត្រីរដ្ឋបាល',documents:'ឯកសាររដ្ឋបាល',requests:'សំណើសេវា',reports:'របាយការណ៍'};
+ $('pageTitle').textContent=titles[id];
+ if(id==='reports')renderReport();
+ $('sidebar').classList.remove('open');
+}
+function updateDashboard(){
+ $('citizenCount').textContent=citizens.length;
+ $('staffCount').textContent=staff.length;
+ $('documentCount').textContent=documents.length;
+ $('requestCount').textContent=requests.length;
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addCitizen(){
+ let name=prompt('បញ្ចូលឈ្មោះប្រជាពលរដ្ឋ:');if(!name)return;
+ let gender=prompt('ភេទ:','ប្រុស')||'មិនបញ្ជាក់';
+ let age=prompt('អាយុ:','20')||'';
+ let address=prompt('អាសយដ្ឋាន:')||'';
+ citizens.push({name,gender,age,address});save('citizens',citizens);renderCitizens();updateDashboard();
+}
+function renderCitizens(){
+ let q=($('citizenSearch').value||'').toLowerCase();
+ $('citizenTable').innerHTML=citizens.map((x,i)=>({...x,i})).filter(x=>x.name.toLowerCase().includes(q)).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.gender)}</td><td>${esc(x.age)}</td><td>${esc(x.address)}</td><td><button class="warning" onclick="editCitizen(${x.i})">កែ</button> <button class="danger" onclick="deleteItem('citizens',${x.i})">លុប</button></td></tr>`).join('');
+}
+function editCitizen(i){
+ let x=citizens[i],name=prompt('កែឈ្មោះ:',x.name);if(name===null)return;
+ x.name=name;x.gender=prompt('កែភេទ:',x.gender)||x.gender;x.age=prompt('កែអាយុ:',x.age)||x.age;x.address=prompt('កែអាសយដ្ឋាន:',x.address)||x.address;
+ save('citizens',citizens);renderCitizens();
+}
+function addStaff(){
+ let name=prompt('ឈ្មោះមន្ត្រី:');if(!name)return;
+ let gender=prompt('ភេទ:','ប្រុស')||'';
+ let role=prompt('តួនាទី:')||'';
+ let phone=prompt('លេខទូរស័ព្ទ:')||'';
+ staff.push({name,gender,role,phone});save('staff',staff);renderStaff();updateDashboard();
+}
+function renderStaff(){
+ let q=($('staffSearch').value||'').toLowerCase();
+ $('staffTable').innerHTML=staff.map((x,i)=>({...x,i})).filter(x=>x.name.toLowerCase().includes(q)).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.gender)}</td><td>${esc(x.role)}</td><td>${esc(x.phone)}</td><td><button class="warning" onclick="editStaff(${x.i})">កែ</button> <button class="danger" onclick="deleteItem('staff',${x.i})">លុប</button></td></tr>`).join('');
+}
+function editStaff(i){
+ let x=staff[i],v=prompt('ឈ្មោះ:',x.name);if(v===null)return;x.name=v;
+ x.gender=prompt('ភេទ:',x.gender)||x.gender;x.role=prompt('តួនាទី:',x.role)||x.role;x.phone=prompt('លេខទូរស័ព្ទ:',x.phone)||x.phone;
+ save('staff',staff);renderStaff();
+}
+function addDocument(){
+ let name=prompt('ឈ្មោះឯកសារ:');if(!name)return;
+ let type=prompt('ប្រភេទឯកសារ:')||'ទូទៅ';
+ documents.push({name,type,date:new Date().toLocaleDateString('km-KH')});
+ save('documents',documents);renderDocuments();updateDashboard();
+}
+function renderDocuments(){
+ let q=($('docSearch').value||'').toLowerCase();
+ $('documentTable').innerHTML=documents.map((x,i)=>({...x,i})).filter(x=>x.name.toLowerCase().includes(q)).map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${esc(x.date)}</td><td><button onclick="printDocument(${x.i})">បោះពុម្ព</button> <button class="danger" onclick="deleteItem('documents',${x.i})">លុប</button></td></tr>`).join('');
+}
+function printDocument(i){
+ let x=documents[i],w=window.open('','_blank');
+ w.document.write(`<html lang="km"><meta charset="UTF-8"><title>ឯកសារ</title><body style="font-family:Arial;padding:40px"><h2 style="text-align:center">ឯកសាររដ្ឋបាល</h2><h3>${esc(x.name)}</h3><p>ប្រភេទ៖ ${esc(x.type)}</p><p>កាលបរិច្ឆេទ៖ ${esc(x.date)}</p><script>window.print()<\/script></body></html>`);
+ w.document.close();
+}
+function addRequest(){
+ let name=prompt('ឈ្មោះអ្នកស្នើសុំ:');if(!name)return;
+ let service=prompt('ប្រភេទសេវា:')||'សេវាទូទៅ';
+ requests.push({name,service,date:new Date().toLocaleDateString('km-KH'),status:'កំពុងរង់ចាំ'});
+ save('requests',requests);renderRequests();updateDashboard();
+}
+function renderRequests(){
+ $('requestTable').innerHTML=requests.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.service)}</td><td>${esc(x.date)}</td><td><span class="tag">${esc(x.status)}</span></td><td><button class="success" onclick="approve(${i})">អនុម័ត</button> <button class="danger" onclick="reject(${i})">បដិសេធ</button> <button class="muted" onclick="deleteItem('requests',${i})">លុប</button></td></tr>`).join('');
+}
+function approve(i){requests[i].status='បានអនុម័ត';save('requests',requests);renderRequests();}
+function reject(i){requests[i].status='បានបដិសេធ';save('requests',requests);renderRequests();}
+function deleteItem(key,i){
+ if(!confirm('តើបងប្រាកដថាចង់លុបទិន្នន័យនេះមែនទេ?'))return;
+ if(key==='citizens')citizens.splice(i,1);
+ if(key==='staff')staff.splice(i,1);
+ if(key==='documents')documents.splice(i,1);
+ if(key==='requests')requests.splice(i,1);
+ save(key,({citizens,staff,documents,requests})[key]);
+ ({citizens:renderCitizens,staff:renderStaff,documents:renderDocuments,requests:renderRequests})[key]();
+ updateDashboard();
+}
+function renderReport(){
+ $('reportText').innerHTML=`ប្រជាពលរដ្ឋសរុប៖ <b>${citizens.length}</b><br>មន្ត្រីសរុប៖ <b>${staff.length}</b><br>ឯកសារសរុប៖ <b>${documents.length}</b><br>សំណើសរុប៖ <b>${requests.length}</b><br>សំណើបានអនុម័ត៖ <b>${requests.filter(x=>x.status==='បានអនុម័ត').length}</b>`;
+}
+function exportData(){
+ let data={citizens,staff,documents,requests};
+ let a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+ a.href=url;a.download='administration-data.json';a.click();URL.revokeObjectURL(url);
+}
+function importData(e){
+ let file=e.target.files[0];if(!file)return;
+ let reader=new FileReader();
+ reader.onload=()=>{
+ try{
+ let d=JSON.parse(reader.result);
+ citizens=d.citizens||[];staff=d.staff||[];documents=d.documents||[];requests=d.requests||[];
+ ['citizens','staff','documents','requests'].forEach(k=>save(k,({citizens,staff,documents,requests})[k]));
+ renderAll();alert('នាំចូលទិន្នន័យជោគជ័យ!');
+ }catch(err){alert('ឯកសារមិនត្រឹមត្រូវ!');}
+ };
+ reader.readAsText(file);
+}
+function renderAll(){renderCitizens();renderStaff();renderDocuments();renderRequests();updateDashboard();}
+renderAll();
+</script>
+</body>
+</html>
